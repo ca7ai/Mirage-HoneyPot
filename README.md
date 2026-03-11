@@ -16,26 +16,43 @@ The system is divided into two distinct components to ensure operational securit
 
 ## Setup & Deployment
 
+### Prerequisites (Ubuntu/Debian)
+To ensure the honeypot survives SSH disconnects, install `tmux`:
 ```bash
-# Install dependencies
+sudo apt update
+sudo apt install tmux -y
+```
+
+### Installation
+```bash
+# Clone and setup environment
+git clone https://github.com/ca7ai/Talos-Mirage.git
+cd Talos-Mirage
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### 1. Launch the Trap (Public-Facing Honeypot)
+Run the trap in a detached background session:
 ```bash
-tmux new -s trap "uvicorn trap:app --host 0.0.0.0 --port 8080"
+tmux new -d -s trap "source venv/bin/activate && uvicorn trap:app --host 0.0.0.0 --port 8080"
 ```
 
 ### 2. Launch the Radar (Internal Dashboard)
+Run the radar in a detached background session, bound strictly to localhost:
 ```bash
-tmux new -s radar "uvicorn radar:app --host 127.0.0.1 --port 8081"
+tmux new -d -s radar "source venv/bin/activate && uvicorn radar:app --host 127.0.0.1 --port 8081"
 ```
 
-### 3. Accessing the Telemetry Dashboard
-Because `radar.py` runs on the local loopback, you must use SSH port forwarding from your local machine to view the telemetry:
+### 3. Managing Sessions
+* **List running sessions:** `tmux ls`
+* **View live trap logs:** `tmux attach -t trap`
+* **Detach from a session (leave it running):** Press `Ctrl+B`, release, then press `D`.
+
+### 4. Accessing the Telemetry Dashboard
+Because `radar.py` runs on the local loopback, you must use SSH port forwarding from your local machine to view the telemetry. Run this from your laptop:
 ```bash
 ssh -L 8081:127.0.0.1:8081 ubuntu@<YOUR_EC2_PUBLIC_IP>
 ```
-Once tunneled, open your browser to: `http://localhost:8081/`
+Once the tunnel is established, open your browser to: `http://localhost:8081/`
