@@ -50,9 +50,18 @@ tmux new -d -s radar "source venv/bin/activate && uvicorn radar:app --host 127.0
 * **View live trap logs:** `tmux attach -t trap`
 * **Detach from a session (leave it running):** Press `Ctrl+B`, release, then press `D`.
 
-### 4. Accessing the Telemetry Dashboard
-Because `radar.py` runs on the local loopback, you must use SSH port forwarding from your local machine to view the telemetry. Run this from your laptop:
+### 4. Accessing the Telemetry Dashboard (SSH Tunneling)
+Because `radar.py` is locked down to the server's local loopback (`127.0.0.1`), you cannot access it directly via the public internet. You must tunnel the port to your local machine.
+
+**Step A:** Open a terminal on your local laptop/computer and type the following SSH port binding command:
 ```bash
 ssh -L 8081:127.0.0.1:8081 ubuntu@<YOUR_EC2_PUBLIC_IP>
 ```
-Once the tunnel is established, open your browser to: `http://localhost:8081/`
+*(Leave this terminal window open to keep the tunnel active).*
+
+**Step B:** Open your local web browser and type the following URL exactly as shown:
+```text
+http://localhost:8081
+```
+
+You will now see the live Talos-Mirage Radar telemetry.
