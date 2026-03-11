@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Talos-Mirage Telemetry</title>
+    <style>
+        body { background-color: #0a0a0a; color: #00ff00; font-family: monospace; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        th { background-color: #1a1a1a; color: #fff; }
+        .alert { color: #ff3333; font-weight: bold; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>[ MIRAGE ] Cognitive Telemetry Radar</h1>
+        <button onclick="fetchLogs()" style="background:#333;color:#0f0;border:1px solid #0f0;padding:5px 10px;cursor:pointer;">Refresh Radar</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Endpoint</th>
+                <th>Inferred LLM / Framework</th>
+                <th>Payload Snippet</th>
+            </tr>
+        </thead>
+        <tbody id="log-body">
+            <tr><td colspan="5">Awaiting telemetry...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/telemetry');
+                const logs = await response.json();
+                const tbody = document.getElementById('log-body');
+                tbody.innerHTML = '';
+                
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5">No active threats detected.</td></tr>';
+                    return;
+                }
+
+                logs.reverse().forEach(log => {
+                    const date = new Date(log.timestamp * 1000).toISOString().replace('T', ' ').substr(0, 19);
+                    const row = document.createElement('tr');
+                    
+                    let llmClass = log.inferred_llm.includes("Unknown") ? "" : "alert";
+                    let payloadStr = log.payload ? (log.payload.length > 50 ? log.payload.substring(0,50) + '...' : log.payload) : 'N/A';
+                    
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>${log.source_ip}</td>
+                        <td>${log.endpoint}</td>
+                        <td class="${llmClass}">${log.inferred_llm}</td>
+                        <td style="color:#aaa;">${payloadStr}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (e) {
+                console.error("Failed to fetch telemetry", e);
+            }
+        }
+        
+        // Auto-refresh every 5 seconds
+        setInterval(fetchLogs, 5000);
+        fetchLogs();
+    </script>
+</body>
+</html>
