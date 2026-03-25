@@ -4,7 +4,7 @@
 **Classification:** Active Defense / Agentic Honeypot    
 
 ## Overview
-Mirage HoneyPot is an asymmetric defense engine / AI Agentic Honeypot engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary. While traditional honeypots target human latency, Talos-Mirage targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
+Mirage HoneyPot is an asymmetric defense engine / AI Agentic Honeypot engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary. While traditional honeypots target human latency, Mirage HoneyPot targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
 
 <img width="1403" height="223" alt="1" src="https://github.com/user-attachments/assets/448e3602-fa51-4de0-9ba9-be44be5b7a48" />
 
@@ -68,4 +68,4 @@ ssh -i <private_key>.pem -L 8080:127.0.0.1:8081 <user-name>@<public-IP>
 http://localhost:8080/admin/dashboard
 ```
 
-You will now see the live Talos-Mirage Radar telemetry.
+You will now see the live Mirage HoneyPot Radar telemetry.

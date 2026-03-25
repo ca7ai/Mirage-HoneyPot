@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 app = FastAPI(
-    title="Talos-Mirage Radar",
+    title="Mirage HoneyPot Radar",
     description="Internal telemetry dashboard.",
     version="1.0.0"
 )
