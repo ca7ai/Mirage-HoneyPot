@@ -1,11 +1,10 @@
-# Talos-Mirage
+# Mirage HoneyPot
 
 **Status:** Active  
-**Classification:** Active Defense / Agentic Honeypot  
-**Architect:** ca7ai / Talos  
+**Classification:** Active Defense / Agentic Honeypot    
 
 ## Overview
-Talos-Mirage is an asymmetric defense engine / AI Agentic Honeypot engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary. While traditional honeypots target human latency, Talos-Mirage targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
+Mirage HoneyPot is an asymmetric defense engine / AI Agentic Honeypot engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary. While traditional honeypots target human latency, Talos-Mirage targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
 
 <img width="1403" height="223" alt="1" src="https://github.com/user-attachments/assets/448e3602-fa51-4de0-9ba9-be44be5b7a48" />
 
@@ -27,8 +26,8 @@ sudo apt install tmux -y
 ### Installation
 ```bash
 # Clone and setup environment
-git clone https://github.com/ca7ai/Talos-Mirage.git
-cd Talos-Mirage
+git clone https://github.com/ca7ai/Mirage-HoneyPot.git
+cd Mirage-HoneyPot
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
