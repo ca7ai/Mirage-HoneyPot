@@ -10,9 +10,10 @@ While traditional honeypots target human latency, Mirage-HoneyPot targets the co
 
 The system is divided into two distinct components to ensure operational security and process isolation:
 
-    The Trap (trap.py): The public-facing sensor. Binds to 0.0.0.0:80. It exposes deceptive endpoints and records high-fidelity adversarial telemetry.
-
-    The Radar (radar.py): The internal analytics engine. Binds to 127.0.0.1:8081. Securely serves the HTML telemetry dashboard and is inaccessible from the public internet.
+- The Trap (trap.py): The public-facing sensor. Binds to 0.0.0.0:80.
+  > It exposes deceptive endpoints and records high-fidelity adversarial telemetry.
+- The Radar (radar.py): The internal analytics engine. Binds to 127.0.0.1:8081.
+  > Securely serves the HTML telemetry dashboard and is inaccessible from the public internet.
 
 ## 🚀 Setup & Deployment
 ### 1.  Installation
