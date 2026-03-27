@@ -3,40 +3,43 @@
 <head>
     <title>Mirage HoneyPot Telemetry</title>
     <style>
-        body { background-color: #0a0a0a; color: #00ff00; font-family: monospace; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
-        th { background-color: #1a1a1a; color: #fff; }
-        .alert { color: #ff3333; font-weight: bold; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .controls { display: flex; gap: 10px; }
-        .btn { padding: 5px 10px; cursor: pointer; font-family: monospace; }
-        .btn-refresh { background: #333; color: #0f0; border: 1px solid #0f0; }
-        .btn-purge { background: #800; color: #fff; border: 1px solid #f00; }
+        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; border: 1px solid #333; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background-color: #1a1a1a; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        tr:hover { background-color: #111; }
+        .alert { color: #ff3333; font-weight: bold; text-shadow: 0 0 5px #ff0000; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 15px; }
+        .controls { display: flex; gap: 15px; }
+        .btn { padding: 8px 15px; cursor: pointer; font-family: monospace; font-weight: bold; transition: 0.3s; }
+        .btn-refresh { background: #000; color: #0f0; border: 1px solid #0f0; }
+        .btn-refresh:hover { background: #0f0; color: #000; }
+        .btn-purge { background: #400; color: #fff; border: 1px solid #f00; }
+        .btn-purge:hover { background: #f00; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>[ MIRAGE ] Cognitive Telemetry Radar</h1>
+        <h1>[ MIRAGE ] Telemetry Radar</h1>
         <div class="controls">
-            <button class="btn btn-refresh" onclick="fetchLogs()">Refresh Radar</button>
-            <button class="btn btn-purge" onclick="clearLogs()">Purge Radar</button>
+            <button class="btn btn-refresh" onclick="fetchLogs()">Manual Refresh</button>
+            <button class="btn btn-purge" onclick="clearLogs()">Purge Logs</button>
         </div>
     </div>
     <table>
         <thead>
             <tr>
-                <th>Timestamp (Local)</th>
+                <th>Timestamp (UTC)</th>
                 <th>Source IP</th>
                 <th>Geo Location</th>
-                <th>ISP / ASN</th>
-                <th>Target Endpoint</th>
-                <th>Inferred Framework</th>
-                <th>Payload Snippet</th>
+                <th>ISP / Network</th>
+                <th>Endpoint</th>
+                <th>Inferred Type</th>
+                <th>Payload</th>
             </tr>
         </thead>
         <tbody id="log-body">
-            <tr><td colspan="7">Awaiting telemetry...</td></tr>
+            <tr><td colspan="7" style="text-align:center;">Initializing satellite link...</td></tr>
         </tbody>
     </table>
 
@@ -46,49 +49,54 @@
                 const response = await fetch('/api/telemetry');
                 const logs = await response.json();
                 const tbody = document.getElementById('log-body');
-                tbody.innerHTML = '';
                 
-                if (logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7">No active threats detected.</td></tr>';
+                if (!logs || logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No active threats detected. Radar silent.</td></tr>';
                     return;
                 }
 
+                tbody.innerHTML = '';
+                // Reverse to show newest at the top
                 logs.reverse().forEach(log => {
-                    const date = new Date(log.timestamp * 1000).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
                     const row = document.createElement('tr');
                     
-                    let llmClass = log.inferred_llm.includes("Unknown") ? "" : "alert";
-                    let payloadStr = log.payload ? (log.payload.length > 30 ? log.payload.substring(0,30) + '...' : log.payload) : 'N/A';
+                    // Fix: Handle ISO String Timestamps
+                    const date = new Date(log.timestamp).toLocaleString();
                     
-                    let geoStr = log.geo ? log.geo : 'Unknown';
-                    let ispStr = log.isp ? log.isp : 'Unknown';
+                    // Fix: Map to "inferred_type" from trap.py
+                    const botType = log.inferred_type || "Unknown Scanner";
+                    const isAi = !botType.includes("Scanner");
+                    const typeClass = isAi ? "alert" : "";
+                    
+                    const payloadSnippet = log.payload ? (log.payload.length > 40 ? log.payload.substring(0,40) + '...' : log.payload) : 'None';
                     
                     row.innerHTML = `
                         <td>${date}</td>
-                        <td style="color:#00ffff;">${log.source_ip}</td>
-                        <td>${geoStr}</td>
-                        <td>${ispStr}</td>
-                        <td>${log.endpoint}</td>
-                        <td class="${llmClass}">${log.inferred_llm}</td>
-                        <td style="color:#aaa;">${payloadStr}</td>
+                        <td style="color:#00ffff; font-weight:bold;">${log.source_ip}</td>
+                        <td>${log.geo || 'N/A'}</td>
+                        <td>${log.isp || 'N/A'}</td>
+                        <td style="color:#ffa500;">${log.method} ${log.endpoint}</td>
+                        <td class="${typeClass}">${botType}</td>
+                        <td style="color:#888; font-style:italic;">${payloadSnippet}</td>
                     `;
                     tbody.appendChild(row);
                 });
             } catch (e) {
-                console.error("Failed to fetch telemetry", e);
-            }
-        }
-        
-        async function clearLogs() {
-            if(confirm("Purge all telemetry logs? This cannot be undone.")) {
-                try {
-                    await fetch("/api/telemetry/clear", { method: "POST" });
-                    fetchLogs();
-                } catch (e) { console.error("Failed to clear logs", e); }
+                console.error("Telemetry Fetch Error:", e);
             }
         }
 
-        setInterval(fetchLogs, 5000);
+        async function clearLogs() {
+            if(confirm("Confirm: Purge all telemetry data?")) {
+                try {
+                    await fetch("/api/telemetry/clear", { method: "POST" });
+                    fetchLogs();
+                } catch (e) { console.error("Purge failed", e); }
+            }
+        }
+
+        // Auto-refresh every 10 seconds
+        setInterval(fetchLogs, 10000);
         fetchLogs();
     </script>
 </body>

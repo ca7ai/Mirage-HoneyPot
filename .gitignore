@@ -1,6 +1,27 @@
+# Python environment and cache
 venv/
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Application Logs & Telemetry (Critical to ignore)
 *.jsonl
+*.log
+honeypot.log
+radar.log
+
+# IDE and System files
 .env
 .idea/
 .vscode/
+.DS_Store
+
+# SSH Keys (Safety check)
+*.pem
+*.key
+
+aws/
+awscliv2.zip
+*_backup.py
+*_backup.html
+trap_backpy.py

@@ -9,28 +9,39 @@ app = FastAPI(
     version="1.0.0"
 )
 
-LOG_FILE = "honeypot_logs.jsonl"
+# CRITICAL: This must match the ABSOLUTE path in trap.py
+LOG_FILE = "/home/ubuntu/Mirage-HoneyPot/honeypot_logs.jsonl"
+DASHBOARD_PATH = "/home/ubuntu/Mirage-HoneyPot/dashboard.html"
 
 @app.get("/", response_class=HTMLResponse)
 @app.get("/admin/dashboard", response_class=HTMLResponse)
 async def dashboard_view():
-    if os.path.exists("dashboard.html"):
-        with open("dashboard.html", "r") as f:
+    """
+    Serves the static HTML dashboard file using an absolute path.
+    """
+    if os.path.exists(DASHBOARD_PATH):
+        with open(DASHBOARD_PATH, "r") as f:
             return HTMLResponse(content=f.read(), status_code=200)
-    return HTMLResponse(content="<h1>Dashboard missing</h1>", status_code=404)
+    return HTMLResponse(content=f"<h1>Dashboard ({DASHBOARD_PATH}) missing</h1>", status_code=404)
 
 @app.get("/api/telemetry")
 async def get_telemetry():
+    """
+    Reads the JSONL log file and returns the last 50 entries.
+    """
     logs = []
     if os.path.exists(LOG_FILE):
         with open(LOG_FILE, "r") as f:
             for line in f:
-                if line.strip():
+                line = line.strip()
+                if line:
                     try:
                         logs.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
-    return logs[-50:]
+    
+    # Reverse to show newest first for the dashboard
+    return logs[::-1][:50]
 
 @app.post("/api/telemetry/clear")
 async def clear_telemetry():
@@ -38,3 +49,9 @@ async def clear_telemetry():
         with open(LOG_FILE, "w") as f:
             f.write("")
     return {"status": "cleared"}
+
+if __name__ == "__main__":
+    import uvicorn
+    # Change host to 0.0.0.0 if you want to access it via public IP:8081 
+    # OR stay 127.0.0.1 for SSH Tunneling (more secure for SOC managers)
+    uvicorn.run(app, host="0.0.0.0", port=8081)
