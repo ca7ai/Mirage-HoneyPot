@@ -1,30 +1,22 @@
-# Mirage HoneyPot
 
-**Status:** Active  
-**Classification:** Active Defense / Agentic Honeypot    
+# 🍯 Mirage-HoneyPot
+## Asymmetric Defense Engine & AI Agentic Trap
 
-## Overview
-Mirage HoneyPot is an asymmetric defense engine / AI Agentic Honeypot engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary. While traditional honeypots target human latency, Mirage HoneyPot targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
+Mirage-HoneyPot is an asymmetric defense engine engineered to intercept, profile, and neutralize adversarial or misaligned autonomous agents. By deploying deceptive API surfaces invisible to humans but high-signal for AI scrapers, it shifts the cost of attack onto the adversary.
 
-<img width="1403" height="223" alt="1" src="https://github.com/user-attachments/assets/448e3602-fa51-4de0-9ba9-be44be5b7a48" />
+While traditional honeypots target human latency, Mirage-HoneyPot targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
 
+## 🏗️ Zero-Trust Architecture
 
-## Zero-Trust Architecture
-The system is divided into two distinct components to ensure operational security:
-1. **The Trap (`trap.py`):** Binds to `0.0.0.0:8080`. Publicly exposes the honeypot endpoints and records adversarial telemetry.
-2. **The Radar (`radar.py`):** Binds to `127.0.0.1:8081`. Securely serves the HTML telemetry dashboard. Inaccessible from the public internet.
+The system is divided into two distinct components to ensure operational security and process isolation:
 
-## Setup & Deployment
+    The Trap (trap.py): The public-facing sensor. Binds to 0.0.0.0:80. It exposes deceptive endpoints and records high-fidelity adversarial telemetry.
 
-### Prerequisites (Ubuntu/Debian)
-To ensure the honeypot survives SSH disconnects, install `tmux`:
-```bash
-sudo apt update
-sudo apt install tmux -y
+    The Radar (radar.py): The internal analytics engine. Binds to 127.0.0.1:8081. Securely serves the HTML telemetry dashboard and is inaccessible from the public internet.
+
+## 🚀 Setup & Deployment
+### 1.  Installation
 ```
-
-### Installation
-```bash
 # Clone and setup environment
 git clone https://github.com/ca7ai/Mirage-HoneyPot.git
 cd Mirage-HoneyPot
@@ -33,39 +25,77 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 1. Launch the Trap (Public-Facing Honeypot)
-Run the trap in a detached background session:
-```bash
-tmux new -d -s trap "source venv/bin/activate && uvicorn trap:app --host 0.0.0.0 --port 8080"
+### 2. Persistent Service Deployment (systemd)
+
+To ensure the HoneyPot survives reboots and SSH disconnects, deploy both components as system services.
+
+#### Deploy the Trap:
+```sudo vi /etc/systemd/system/mirage-honeypot.service```
+```
+[Unit]
+Description=Mirage HoneyPot Trap (Port 80)
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/ubuntu/Mirage-HoneyPot
+ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn trap:app --host 0.0.0.0 --port 80
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-### 2. Launch the Radar (Internal Dashboard)
-Run the radar in a detached background session, bound strictly to localhost:
-```bash
-tmux new -d -s radar "source venv/bin/activate && uvicorn radar:app --host 127.0.0.1 --port 8081"
+#### Deploy the Radar:
+
+```sudo vi /etc/systemd/system/mirage-radar.service```
+
+```
+[Unit]
+Description=Mirage Radar Dashboard (Port 8081)
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Mirage-HoneyPot
+ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn radar:app --host 127.0.0.1 --port 8081
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-### 3. Managing Sessions
-* **List running sessions:** `tmux ls`
-* **View live trap logs:** `tmux attach -t trap`
-* **Detach from a session (leave it running):** Press `Ctrl+B`, release, then press `D`.
-
-### 4. Accessing the Telemetry Dashboard (SSH Tunneling)
-Because `radar.py` is locked down to the server's local loopback (`127.0.0.1`), you cannot access it directly via the public internet. You must tunnel the port to your local machine.
-
-**Step A:** Open a terminal on your local laptop/computer and type the following SSH port binding command:
-```bash
-ssh -i <private_key>.pem -L 8080:127.0.0.1:8081 <user-name>@<public-IP>
+#### Enable & Start Services:
 ```
-*(Leave this terminal window open to keep the tunnel active).*
-
-**Step B:** Run the following command to enable the dashboard
-
-```../venv/bin/python3 -m uvicorn radar:app --host 127.0.0.1 --port 8081```
-
-**Step C:** Open your local web browser and type the following URL exactly as shown:
-```text
-http://localhost:8080/admin/dashboard
+sudo systemctl daemon-reload
+sudo systemctl enable mirage-honeypot mirage-radar
+sudo systemctl start mirage-honeypot mirage-radar
 ```
 
-You will now see the live Mirage HoneyPot Radar telemetry.
+### 📊 Accessing the Telemetry Radar
+
+Because radar.py is locked to the local loopback (127.0.0.1), it is invisible to the public internet. Access requires a secure SSH tunnel.
+
+#### Step A: Establish the Secure Tunnel
+
+Run this on your local machine (Laptop):
+
+```
+ssh -i <your-key>.pem -L 8081:127.0.0.1:8081 ubuntu@<EC2-Public-IP>
+```
+
+#### Step B: View the Dashboard
+
+Open your local browser and navigate to:
+
+```
+http://localhost:8081/admin/dashboard
+```
+
+### ⚖️ Legal & Ethical Use
+
+This data is provided "as-is" for defensive security research. All telemetry originates from unsolicited traffic targeting unadvertised, non-production infrastructure. Usage of captured IoCs should comply with local and international regulations.
+
+###  License
+
+This project is licensed under the MIT License.
