@@ -46,10 +46,6 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/home/ubuntu/Mirage-HoneyPot
-# This ensures the log file exists and has correct permissions for the Dashboard to Purge it
-ExecStartPre=/usr/bin/touch /home/ubuntu/Mirage-HoneyPot/honeypot_logs.jsonl
-ExecStartPre=/usr/bin/chmod 664 /home/ubuntu/Mirage-HoneyPot/honeypot_logs.jsonl
-ExecStartPre=/usr/bin/chown root:ubuntu /home/ubuntu/Mirage-HoneyPot/honeypot_logs.jsonl
 ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn trap:app --host 0.0.0.0 --port 80
 Restart=always
 
@@ -75,27 +71,6 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-
-### Grant Network Capabilities
-Since the Trap binds to Port 80 (a privileged port), you must grant the Python binary the specific capability to bind to low-numbered ports. Run this on your system running the honeypot:
-
-```sudo setcap 'cap_net_bind_service=+ep' /home/ubuntu/Mirage-HoneyPot/venv/bin/python3```
-
-> Note: This allows the service to run securely without requiring a full root shell for the entire Python environment.
-
-### Enable & Start Services
-
-```
-sudo systemctl daemon-reload
-sudo systemctl enable mirage-honeypot mirage-radar
-sudo systemctl start mirage-honeypot mirage-radar
-```
-
-#### Critical: Dependency Synchronization
-Ensure that all required libraries (like `httpx`) are installed and accessible to the service runner:
-
-```sudo ./venv/bin/pip install -r requirements.txt```
-
 
 #### Enable & Start Services:
 ```
