@@ -10,7 +10,7 @@ While traditional honeypots target human latency, Mirage-HoneyPot targets the co
 
 ## Active HoneyPot Captured IPs
 
-[![Threat Intel Feed](https://img.shields.io/badge/Live_Threat_Intel-Mirage--Sight-00ff00?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ca7ai/Mirage-Sight/tree/main)
+[![Threat Intel Feed](https://img.shields.io/badge/Live_Threat_Intel-Mirage--Sight-FC6A03?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ca7ai/Mirage-Sight/tree/main)
 
 ## 🏗️ Zero-Trust Architecture
 
