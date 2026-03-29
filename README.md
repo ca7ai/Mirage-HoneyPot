@@ -105,8 +105,8 @@ This data is provided "as-is" for defensive security research. All telemetry ori
 
 ###  License
 
-This project is licensed under the PolyForm Noncommercial License 1.0.0.
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
-    Free for: Researchers, students, hobbyists, and non-profit organizations.
-    Commercial Use: If you want to use this code in a commercial product or business context, you must purchase a Commercial License. Please contact me via LinkedIn.
+* **Free for:** Researchers, students, hobbyists, and non-profit organizations.
+* **Commercial Use:** If you want to use this code in a commercial product or business context, you must purchase a Commercial License. Please contact me via LinkedIn.
 
