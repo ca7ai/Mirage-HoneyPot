@@ -6,6 +6,12 @@ Mirage-HoneyPot is an asymmetric defense engine engineered to intercept, profile
 
 While traditional honeypots target human latency, Mirage-HoneyPot targets the core architectural constraints of LLMs: context window capacity, token budgets, and recursive reasoning loops.
 
+<img width="1666" height="265" alt="aaa" src="https://github.com/user-attachments/assets/6c5f1563-f625-4084-b316-76faa9a9d84b" />
+
+## Active HoneyPot Captured IPs
+
+[![Threat Intel Feed](https://img.shields.io/badge/Live_Threat_Intel-Mirage--Sight-00ff00?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ca7ai/Mirage-Sight/tree/main)
+
 ## 🏗️ Zero-Trust Architecture
 
 The system is divided into two distinct components to ensure operational security and process isolation:
