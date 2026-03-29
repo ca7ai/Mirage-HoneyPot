@@ -1,3 +1,6 @@
 fastapi
 uvicorn
 pydantic
+jinja2
+httpx
+aiosqlite
