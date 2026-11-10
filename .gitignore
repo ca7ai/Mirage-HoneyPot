@@ -9,6 +9,8 @@ __pycache__/
 *.log
 honeypot.log
 radar.log
+*.jsonl.1
+persona.json
 
 # IDE and System files
 .env

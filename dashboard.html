@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Mirage HoneyPot Telemetry</title>
     <style>
         body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; border: 1px solid #333; }
-        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; word-break: break-all; }
         th { background-color: #1a1a1a; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
         tr:hover { background-color: #111; }
         .alert { color: #ff3333; font-weight: bold; text-shadow: 0 0 5px #ff0000; }
@@ -14,15 +15,17 @@
         .btn { padding: 8px 15px; cursor: pointer; font-family: monospace; font-weight: bold; transition: 0.3s; }
         .btn-refresh { background: #000; color: #0f0; border: 1px solid #0f0; }
         .btn-refresh:hover { background: #0f0; color: #000; }
-        .btn-purge { background: #400; color: #fff; border: 1px solid #f00; }
-        .btn-purge:hover { background: #f00; }
+        .ip { color: #00ffff; font-weight: bold; }
+        .endpoint { color: #ffa500; }
+        .payload { color: #888; font-style: italic; }
+        .message { text-align: center; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>[ MIRAGE ] Telemetry Radar</h1>
         <div class="controls">
-            <button class="btn btn-refresh" onclick="fetchLogs()">Manual Refresh</button>
+            <button class="btn btn-refresh" id="refresh">Manual Refresh</button>
         </div>
     </div>
     <table>
@@ -38,65 +41,10 @@
             </tr>
         </thead>
         <tbody id="log-body">
-            <tr><td colspan="7" style="text-align:center;">Initializing satellite link...</td></tr>
+            <tr><td colspan="7" class="message">Initializing satellite link...</td></tr>
         </tbody>
     </table>
 
-    <script>
-        async function fetchLogs() {
-            try {
-                const response = await fetch('/api/telemetry');
-                const logs = await response.json();
-                const tbody = document.getElementById('log-body');
-                
-                if (!logs || logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No active threats detected. Radar silent.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = '';
-                // Reverse to show newest at the top
-                logs.reverse().forEach(log => {
-                    const row = document.createElement('tr');
-                    
-                    // Fix: Handle ISO String Timestamps
-                    const date = new Date(log.timestamp).toLocaleString();
-                    
-                    // Fix: Map to "inferred_type" from trap.py
-                    const botType = log.inferred_type || "Unknown Scanner";
-                    const isAi = !botType.includes("Scanner");
-                    const typeClass = isAi ? "alert" : "";
-                    
-                    const payloadSnippet = log.payload ? (log.payload.length > 40 ? log.payload.substring(0,40) + '...' : log.payload) : 'None';
-                    
-                    row.innerHTML = `
-                        <td>${date}</td>
-                        <td style="color:#00ffff; font-weight:bold;">${log.source_ip}</td>
-                        <td>${log.geo || 'N/A'}</td>
-                        <td>${log.isp || 'N/A'}</td>
-                        <td style="color:#ffa500;">${log.method} ${log.endpoint}</td>
-                        <td class="${typeClass}">${botType}</td>
-                        <td style="color:#888; font-style:italic;">${payloadSnippet}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (e) {
-                console.error("Telemetry Fetch Error:", e);
-            }
-        }
-
-        async function clearLogs() {
-            if(confirm("Confirm: Purge all telemetry data?")) {
-                try {
-                    await fetch("/api/telemetry/clear", { method: "POST" });
-                    fetchLogs();
-                } catch (e) { console.error("Purge failed", e); }
-            }
-        }
-
-        // Auto-refresh every 10 seconds
-        setInterval(fetchLogs, 10000);
-        fetchLogs();
-    </script>
+    <script src="/dashboard.js"></script>
 </body>
 </html>

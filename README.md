@@ -44,9 +44,26 @@ Description=Mirage HoneyPot Trap (Port 80)
 After=network.target
 
 [Service]
-User=root
+# Runs unprivileged; the capability alone allows binding port 80
+User=ubuntu
+Group=ubuntu
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 WorkingDirectory=/home/ubuntu/Mirage-HoneyPot
-ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn trap:app --host 0.0.0.0 --port 80
+# Logs and persona.json live in /var/lib/mirage, the only writable path
+StateDirectory=mirage
+StateDirectoryMode=0750
+Environment=MIRAGE_DATA_DIR=/var/lib/mirage
+ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn trap:app --host 0.0.0.0 --port 80 --no-server-header
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 Restart=always
 
 [Install]
@@ -65,7 +82,12 @@ After=network.target
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/Mirage-HoneyPot
+Environment=MIRAGE_DATA_DIR=/var/lib/mirage
 ExecStart=/home/ubuntu/Mirage-HoneyPot/venv/bin/python3 -m uvicorn radar:app --host 127.0.0.1 --port 8081
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
 Restart=always
 
 [Install]
@@ -78,6 +100,23 @@ sudo systemctl daemon-reload
 sudo systemctl enable mirage-honeypot mirage-radar
 sudo systemctl start mirage-honeypot mirage-radar
 ```
+
+#### Upgrading an existing install
+
+Earlier versions ran the trap as root and wrote logs into the repo directory. After updating the unit files, move existing telemetry into the new data directory:
+
+```
+sudo systemctl stop mirage-honeypot mirage-radar
+sudo systemctl daemon-reload
+sudo systemctl start mirage-honeypot   # creates /var/lib/mirage
+sudo mv /home/ubuntu/Mirage-HoneyPot/honeypot_logs.jsonl /var/lib/mirage/
+sudo chown ubuntu:ubuntu /var/lib/mirage/honeypot_logs.jsonl
+sudo systemctl start mirage-radar
+```
+
+#### Deployment persona
+
+On first start the trap generates `persona.json` in the data directory: a random fake company name, hostnames, and bait credentials. Each deployment serves different bait, so nothing in this public repo works as a signature. Keep the file across restarts so returning visitors see consistent content. Delete it to rotate the persona.
 
 ### 📊 Accessing the Telemetry Radar
 
